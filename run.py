@@ -77,6 +77,8 @@ from voicevox_engine.utility import (
     engine_root,
     get_latest_core_version,
     get_save_dir,
+    check_port_is_live,
+    get_process_by_port,
 )
 
 
@@ -1233,6 +1235,21 @@ if __name__ == "__main__":
         allow_origin = args.allow_origin
     elif settings.allow_origin is not None:
         allow_origin = settings.allow_origin.split(" ")
+
+    # ポートが使われていたら100まで上げてみる
+    port = args.port
+    for i in range(port, port + 100):
+        # ポートが使われていたら
+        if check_port_is_live(port):
+            print(f"ポート{str(port)}は使用されています")
+            processes = get_process_by_port(port).proccess
+            for proc in processes:
+                print(f"PID:{proc.pid()},プロセス名:{proc.name()}")
+            port = i + 1
+            continue
+        else:
+           break
+
 
     uvicorn.run(
         generate_app(
